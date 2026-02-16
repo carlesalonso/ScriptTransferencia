@@ -124,4 +124,3 @@ Este script es de uso libre para propósitos educativos.
 Carlos Alonso Martínez - 2026
 
 ---
-

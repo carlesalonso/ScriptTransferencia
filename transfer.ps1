@@ -4,11 +4,11 @@
 #>
 
 # --- CONFIGURACIÓN ---
-$Org = "Nombre-De-Tu-Organizacion"  # Cambia esto
-$Prefix = "tarea-final-"            # El prefijo de la tarea
+$Org = "classesSMX2n"             # Cambia esto
+$Prefix = "projecte6-"            # El prefijo de la tarea
 # ---------------------
 
-Write-Host "🔍 Buscando repositorios en '$Org'..." -ForegroundColor Cyan
+Write-Host "🔍 Buscando repositorios en '$Org'..." -ForegroundColor Blue
 
 # 1. Listamos los repositorios
 try {
@@ -17,7 +17,7 @@ try {
 }
 catch {
     Write-Host "❌ Error al conectar con GitHub. Ejecuta 'gh auth login' primero." -ForegroundColor Red
-    exit
+    exit 1
 }
 
 # 2. Filtramos por el prefijo
@@ -25,7 +25,7 @@ $TargetRepos = $Repos | Where-Object { $_.name -like "$Prefix*" }
 
 if ($null -eq $TargetRepos) {
     Write-Host "⚠️ No se encontraron repositorios con el prefijo '$Prefix'." -ForegroundColor Yellow
-    exit
+    exit 1
 }
 
 foreach ($Repo in $TargetRepos) {
@@ -48,14 +48,14 @@ foreach ($Repo in $TargetRepos) {
         # --silent evita que imprima todo el JSON de respuesta si tiene éxito
         gh api "repos/$Org/$RepoName/transfer" `
             -F "new_owner=$StudentUser" `
-            -F "new_name=$RepoName" `
-            --silent
-
+            -F "new_name=prova" `
+            ##--silent
         Write-Host " [OK] ✅" -ForegroundColor Green
     }
     catch {
         Write-Host " [ERROR] ❌" -ForegroundColor Red
         Write-Host "   Posibles causas: El usuario '$StudentUser' no existe o ya tiene un repo con ese nombre." -ForegroundColor Gray
+        exit 1
     }
 }
 
