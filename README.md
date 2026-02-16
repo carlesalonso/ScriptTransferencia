@@ -121,8 +121,7 @@ Este script es de uso libre para propósitos educativos.
 
 ## 👨‍💻 Autor
 
-Script creado para facilitar la gestión de repositorios en GitHub Classroom.
+Carlos Alonso Martínez - 2026
 
 ---
 
-**Nota:** Este script utiliza GitHub CLI, asegúrate de estar familiarizado con su uso antes de ejecutar transferencias masivas.
