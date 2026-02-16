@@ -1,61 +1,64 @@
 <#
 .SYNOPSIS
-    Script para transferir repositorios de GitHub Classroom a alumnos masivamente.
+    Script para transferir repositorios de GitHub Classroom usando la API.
 #>
 
 # --- CONFIGURACIÓN ---
-# Cambia esto por el nombre de tu organización
-$Org = "Nombre-De-Tu-Organizacion"
-
-# El prefijo de la tarea (incluyendo el guion final si lo tiene)
-$Prefix = "tarea-final-"
+$Org = "Nombre-De-Tu-Organizacion"  # Cambia esto
+$Prefix = "tarea-final-"            # El prefijo de la tarea
 # ---------------------
 
-Write-Host "🔍 Buscando repositorios en '$Org' que empiecen por '$Prefix'..." -ForegroundColor Cyan
+Write-Host "🔍 Buscando repositorios en '$Org'..." -ForegroundColor Cyan
 
-# Listamos los repositorios y convertimos el JSON de respuesta a objetos de PowerShell
-# Aumenta el --limit si tienes más de 200 alumnos
+# 1. Listamos los repositorios
 try {
+    # Obtenemos la lista en formato JSON y la convertimos a objetos PowerShell
     $Repos = gh repo list $Org --limit 200 --json name | ConvertFrom-Json
 }
 catch {
-    Write-Host "❌ Error al conectar con GitHub. Verifica tu conexión o login." -ForegroundColor Red
+    Write-Host "❌ Error al conectar con GitHub. Ejecuta 'gh auth login' primero." -ForegroundColor Red
     exit
 }
 
-# Filtramos solo los que coinciden con el prefijo
+# 2. Filtramos por el prefijo
 $TargetRepos = $Repos | Where-Object { $_.name -like "$Prefix*" }
 
 if ($null -eq $TargetRepos) {
-    Write-Host "⚠️ No se encontraron repositorios con ese prefijo." -ForegroundColor Yellow
+    Write-Host "⚠️ No se encontraron repositorios con el prefijo '$Prefix'." -ForegroundColor Yellow
     exit
 }
 
 foreach ($Repo in $TargetRepos) {
     $RepoName = $Repo.name
-    
-    # Extraemos el usuario eliminando el prefijo del nombre
-    # Usamos .Substring() para cortar el string de forma precisa
+    # Extraemos el usuario (ej: tarea-final-juan -> juan)
     $StudentUser = $RepoName.Substring($Prefix.Length)
 
     Write-Host "---------------------------------------------------" -ForegroundColor Gray
-    Write-Host "📦 Repositorio: $RepoName"
-    Write-Host "👤 Alumno detectado: $StudentUser"
-    
-    Write-Host "🚀 Enviando solicitud de transferencia..." -ForegroundColor Green
-    
-    # Ejecutamos la transferencia
-    # --yes: Confirma automáticamente
-    # $LASTEXITCODE: Verifica si el comando anterior (gh) tuvo éxito (0) o falló
-    gh repo transfer "$Org/$RepoName" --target "$StudentUser" --new-name "$RepoName" --yes
+    Write-Host "📦 Repo: $RepoName | 👤 Alumno: $StudentUser"
 
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Solicitud enviada correctamente." -ForegroundColor Cyan
-    } else {
-        Write-Host "⚠️ Error al transferir. Es posible que el usuario '$StudentUser' no exista o el repo ya se transfirió." -ForegroundColor Red
+    # 3. Usamos la API para transferir
+    # Endpoint: POST /repos/{owner}/{repo}/transfer
+    # Parámetros: new_owner (obligatorio), new_name (opcional, usamos el mismo)
+    
+    Write-Host "🚀 Enviando petición a la API..." -NoNewline
+    
+    # El comando gh api lanza una excepción si falla, así que usamos try/catch
+    try {
+        # -F (Field) envía los datos como parámetros del cuerpo (JSON)
+        # --silent evita que imprima todo el JSON de respuesta si tiene éxito
+        gh api "repos/$Org/$RepoName/transfer" `
+            -F "new_owner=$StudentUser" `
+            -F "new_name=$RepoName" `
+            --silent
+
+        Write-Host " [OK] ✅" -ForegroundColor Green
+    }
+    catch {
+        Write-Host " [ERROR] ❌" -ForegroundColor Red
+        Write-Host "   Posibles causas: El usuario '$StudentUser' no existe o ya tiene un repo con ese nombre." -ForegroundColor Gray
     }
 }
 
 Write-Host "---------------------------------------------------"
 Write-Host "🏁 Proceso finalizado." -ForegroundColor Cyan
-Write-Host "IMPORTANTE: Recuerda a los alumnos que deben revisar su email para ACEPTAR la transferencia." -ForegroundColor Yellow
+Write-Host "IMPORTANTE: Los alumnos recibirán un EMAIL de GitHub que deben ACEPTAR para completar la transferencia." -ForegroundColor Yellow
