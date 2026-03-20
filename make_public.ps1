@@ -1,15 +1,9 @@
-<#
-.SYNOPSIS
-    Script para transferir repositorios de GitHub Classroom usando la API.
-#>
-
 # --- CONFIGURACIÓN ---
 $Org = "classesSMX2n"             # Cambia esto
-$Prefix = "projecte6-"            # El prefijo de la tarea
-$Name ="prova"                    # Nombre del repositorio en el nuevo propietario (opcional)
+$Prefix = "projecte5-"            # El prefijo de la tarea
 # ---------------------
 
-Write-Host "🔍 Buscando repositorios en '$Org'..." -ForegroundColor Blue
+Write-Host "🔍 Buscando repositorios en '$Org' que empiecen por '$Prefix'..." -ForegroundColor Cyan
 
 # 1. Listamos los repositorios
 try {
@@ -37,17 +31,10 @@ foreach ($Repo in $TargetRepos) {
     Write-Host "---------------------------------------------------" -ForegroundColor Gray
     Write-Host "📦 Repo: $RepoName | 👤 Alumno: $StudentUser"
 
-    # 3. Usamos la API para transferir
-    # Endpoint: POST /repos/{owner}/{repo}/transfer
-    # Parámetros: new_owner (obligatorio), new_name (opcional, usamos el mismo)
-    
-    Write-Host "🚀 Enviando petición a la API..." -NoNewline
+    Write-Host "🔓 Cambiando visibilidad a público..." -NoNewline
     
     # Ejecutamos el comando y verificamos el código de salida
-    gh api "repos/$Org/$RepoName/transfer" `
-        -F "new_owner=$StudentUser" `
-        -F "new_name=$RepoName" `
-        --silent 2>$null
+    gh repo edit "$Org/$RepoName" --visibility public --accept-visibility-change-consequences
     
     # Verificamos si el comando fue exitoso
     if ($LASTEXITCODE -eq 0) {
@@ -56,13 +43,8 @@ foreach ($Repo in $TargetRepos) {
     else {
         Write-Host " [ERROR] ❌" -ForegroundColor Red
         Write-Host "   Posibles causas:" -ForegroundColor Gray
-        Write-Host "   - El usuario '$StudentUser' no existe" -ForegroundColor Gray
-        Write-Host "   - Ya tiene un repo con ese nombre" -ForegroundColor Gray
-        Write-Host "   - El repositorio tiene restricciones (issues, packages, etc.)" -ForegroundColor Gray
-        Write-Host "   Continuando con el siguiente repositorio..." -ForegroundColor Yellow
+        Write-Host "   - El repositorio no existe" -ForegroundColor Gray
+        Write-Host "   - No tienes permisos para modificarlo" -ForegroundColor Gray
     }
-}
 
-Write-Host "---------------------------------------------------"
-Write-Host "🏁 Proceso finalizado." -ForegroundColor Cyan
-Write-Host "IMPORTANTE: Los alumnos recibirán un EMAIL de GitHub que deben ACEPTAR para completar la transferencia." -ForegroundColor Yellow
+}
