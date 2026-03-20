@@ -1,3 +1,9 @@
+param(
+    [Parameter(Mandatory = $true)]
+    [ValidateSet("public", "private")]
+    [string]$Visibility
+)
+
 # --- CONFIGURACIÓN ---
 $Org = "classesSMX2n"             # Cambia esto
 $Prefix = "projecte5-"            # El prefijo de la tarea
@@ -31,10 +37,25 @@ foreach ($Repo in $TargetRepos) {
     Write-Host "---------------------------------------------------" -ForegroundColor Gray
     Write-Host "📦 Repo: $RepoName | 👤 Alumno: $StudentUser"
 
-    Write-Host "🔓 Cambiando visibilidad a público..." -NoNewline
+    $CurrentVisibility = gh repo view "$Org/$RepoName" --json visibility --jq ".visibility" 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($CurrentVisibility)) {
+        Write-Host "⚠️ No se pudo obtener la visibilidad actual. Se omite este repositorio." -ForegroundColor Yellow
+        continue
+    }
+
+    $CurrentVisibility = $CurrentVisibility.Trim().ToLower()
+
+    Write-Host "ℹ️ Cambio solicitado: $CurrentVisibility -> $Visibility"
+
+    if ($CurrentVisibility -eq $Visibility) {
+        Write-Host "✅ Ya tiene la visibilidad '$Visibility'. No se realiza ningún cambio." -ForegroundColor Green
+        continue
+    }
+
+    Write-Host "🔧 Aplicando cambio de visibilidad a '$Visibility'..." -NoNewline
     
     # Ejecutamos el comando y verificamos el código de salida
-    gh repo edit "$Org/$RepoName" --visibility public --accept-visibility-change-consequences
+    gh repo edit "$Org/$RepoName" --visibility $Visibility --accept-visibility-change-consequences
     
     # Verificamos si el comando fue exitoso
     if ($LASTEXITCODE -eq 0) {
