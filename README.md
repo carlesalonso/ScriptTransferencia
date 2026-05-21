@@ -1,126 +1,85 @@
-# 📦 Script de Transferencia Masiva de Repositorios
+# 🔐 Script per canviar la visibilitat de repositoris
 
-Script de PowerShell para transferir repositorios de GitHub Classroom a estudiantes de forma automática y masiva.
+Aquest repositori conté l’script `make_public.ps1`, que permet canviar de forma massiva la visibilitat de repositoris d’una organització de GitHub segons un prefix.
 
-## 📋 Descripción
+## 📋 Què fa
 
-Este script automatiza el proceso de transferencia de repositorios de una organización de GitHub Classroom a las cuentas personales de los estudiantes. Es especialmente útil cuando necesitas devolver la propiedad de los repositorios de tareas finales a los alumnos.
+L’script:
 
-## ✨ Características
+- Cerca repositoris dins una organització (`$Org`)
+- Filtra pels que comencen amb un prefix (`$Prefix`)
+- Comprova la visibilitat actual de cada repositori
+- Aplica el canvi a `public` o `private` segons el paràmetre d’entrada
 
-- 🔍 Búsqueda automática de repositorios por prefijo
-- 👤 Extracción automática del nombre de usuario del estudiante
-- 🚀 Transferencia masiva con confirmación automática
-- ✅ Validación de errores y feedback visual
-- 📊 Reporte detallado del proceso
+## ✅ Requisits
 
-## 🔧 Prerequisitos
+Abans d’executar-lo, cal tenir:
 
-Antes de ejecutar el script, asegúrate de tener:
-
-1. **PowerShell** instalado (versión 5.1 o superior)
-2. **GitHub CLI (`gh`)** instalado y configurado
-   - Descárgalo desde: <https://cli.github.com/>
-3. **Autenticación** con GitHub CLI:
+1. **PowerShell** (5.1 o superior)
+2. **GitHub CLI (`gh`)** instal·lat: <https://cli.github.com/>
+3. Sessió iniciada a GitHub CLI:
 
    ```powershell
    gh auth login
+   gh auth status
    ```
 
-4. **Permisos de administrador** en la organización de GitHub
+4. Permisos per editar repositoris de l’organització
 
-## ⚙️ Configuración
+## ⚙️ Configuració
 
-Antes de ejecutar el script, edita las variables de configuración en `transfer.ps1`:
-
-```powershell
-# Nombre de tu organización en GitHub
-$Org = "Nombre-De-Tu-Organizacion"
-
-# Prefijo de los repositorios a transferir
-$Prefix = "tarea-final-"
-```
-
-### Ejemplo de configuración
-
-Si tus repositorios se llaman:
-
-- `tarea-final-juanperez`
-- `tarea-final-mariagarcia`
-- `tarea-final-pedrolopez`
-
-Entonces configura:
+Edita aquestes variables dins `make_public.ps1`:
 
 ```powershell
-$Org = "EscuelaTecnica2024"
-$Prefix = "tarea-final-"
+$Org = "classesSMX2n"
+$Prefix = "projecte5-"
 ```
 
-El script extraerá automáticamente los usuarios: `juanperez`, `mariagarcia`, `pedrolopez`
+- `$Org`: nom de l’organització de GitHub
+- `$Prefix`: prefix dels repositoris sobre els quals s’aplicarà el canvi
 
-## 🚀 Uso
+## 🚀 Ús
 
-1. **Clona o descarga** este repositorio
-2. **Configura** las variables como se explicó anteriormente
-3. **Ejecuta** el script:
+L’script requereix el paràmetre obligatori `-Visibility`, amb valors possibles: `public` o `private`.
 
-   ```powershell
-   .\transfer.ps1
-   ```
+Fer públics els repositoris filtrats:
 
-## 📝 Ejemplo de Ejecución
-
-``` shell
-🔍 Buscando repositorios en 'EscuelaTecnica2024' que empiecen por 'tarea-final-'...
----------------------------------------------------
-📦 Repositorio: tarea-final-juanperez
-👤 Alumno detectado: juanperez
-🚀 Enviando solicitud de transferencia...
-✅ Solicitud enviada correctamente.
----------------------------------------------------
-📦 Repositorio: tarea-final-mariagarcia
-👤 Alumno detectado: mariagarcia
-🚀 Enviando solicitud de transferencia...
-✅ Solicitud enviada correctamente.
----------------------------------------------------
-🏁 Proceso finalizado.
-IMPORTANTE: Recuerda a los alumnos que deben revisar su email para ACEPTAR la transferencia.
+```powershell
+.\make_public.ps1 -Visibility public
 ```
 
-## ⚠️ Advertencias Importantes
+Fer-los privats:
 
-- **Los estudiantes deben ACEPTAR la transferencia** desde su correo electrónico para completar el proceso
-- **El nombre de usuario** debe coincidir exactamente con el username de GitHub del estudiante
-- **Verifica los nombres** antes de ejecutar el script para evitar transferencias erróneas
-- Si un usuario no existe, el script mostrará un error pero continuará con los demás
-- **Aumenta el límite** en la línea `--limit 200` si tienes más de 200 estudiantes
+```powershell
+.\make_public.ps1 -Visibility private
+```
 
-## 🔍 Solución de Problemas
+## ⚠️ Notes importants
 
-### Error de autenticación
+- El canvi de visibilitat afecta directament cada repositori filtrat.
+- Si un repositori ja té la visibilitat desitjada, no es modifica.
+- Si no es pot llegir o editar un repositori, l’script el salta i continua.
+- Revisa bé `$Org` i `$Prefix` abans d’executar-lo.
+
+## 🛠️ Resolució de problemes
+
+Si tens errors d’autenticació:
 
 ```powershell
 gh auth login
 gh auth status
 ```
 
-### No se encuentran repositorios
+Si no troba repositoris:
 
-- Verifica que el prefijo sea correcto (incluyendo guiones)
-- Confirma que los repositorios existen en la organización
+- Verifica que `$Prefix` sigui correcte
+- Confirma que hi ha repositoris amb aquest prefix a `$Org`
 
-### Error al transferir
+Si falla el canvi de visibilitat:
 
-- Verifica que el usuario de GitHub existe
-- Confirma que tienes permisos de administrador
-- Asegúrate de que el repositorio no haya sido transferido previamente
-
-## 📄 Licencia
-
-Este script es de uso libre para propósitos educativos.
+- Comprova permisos a l’organització
+- Revisa que el repositori existeixi i sigui accessible
 
 ## 👨‍💻 Autor
 
 Carlos Alonso Martínez - 2026
-
----
