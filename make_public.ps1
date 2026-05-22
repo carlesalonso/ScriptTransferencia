@@ -9,7 +9,7 @@ $Org = "classesSMX2n"             # Cambia esto
 $Prefix = "projecte5-"            # El prefijo de la tarea
 # ---------------------
 
-Write-Host "🔍 Buscando repositorios en '$Org' que empiecen por '$Prefix'..." -ForegroundColor Cyan
+Write-Host "🔍 Buscant repositoris en '$Org' que comencin per '$Prefix'..." -ForegroundColor Cyan
 
 # 1. Listamos los repositorios
 try {
@@ -17,7 +17,7 @@ try {
     $Repos = gh repo list $Org --limit 200 --json name | ConvertFrom-Json
 }
 catch {
-    Write-Host "❌ Error al conectar con GitHub. Ejecuta 'gh auth login' primero." -ForegroundColor Red
+    Write-Host "❌ Error al connectar amb GitHub. Executa 'gh auth login' primer." -ForegroundColor Red
     exit 1
 }
 
@@ -25,7 +25,7 @@ catch {
 $TargetRepos = $Repos | Where-Object { $_.name -like "$Prefix*" }
 
 if ($TargetRepos.Count -eq 0) {
-    Write-Host "⚠️ No se encontraron repositorios con el prefijo '$Prefix'." -ForegroundColor Yellow
+    Write-Host "⚠️ No es troben repositoris amb el prefix '$Prefix'." -ForegroundColor Yellow
     exit 1
 }
 
