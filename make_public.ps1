@@ -69,3 +69,5 @@ foreach ($Repo in $TargetRepos) {
     }
 
 }
+
+# Afegim un canvi en local
