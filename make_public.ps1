@@ -6,7 +6,7 @@ param(
 
 # --- CONFIGURACIÓN ---
 $Org = "classesSMX2n"             # Cambia esto
-$Prefix = "projecte5-"            # El prefijo de la tarea
+$Prefix = "projecte-8"            # El prefijo de la tarea
 # ---------------------
 
 Write-Host "🔍 Buscant repositoris en '$Org' que comencin per '$Prefix'..." -ForegroundColor Cyan
